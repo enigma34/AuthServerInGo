@@ -1,0 +1,5 @@
+time="2024-07-01T14:59:05+05:30" level=info msg="Request received" method=GET path=/v1/user
+time="2024-07-01T14:59:11+05:30" level=info msg="Request received" method=GET path=/v2/user
+time="2024-07-02T11:47:10+05:30" level=info msg="Request received" method=GET path=/v1/user
+time="2024-07-02T12:12:46+05:30" level=info msg="Request received" method=GET path=/v1/user
+time="2024-07-02T12:14:21+05:30" level=info msg="Request received" method=GET path=/v1/user
