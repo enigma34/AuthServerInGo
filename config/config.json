@@ -1,0 +1,15 @@
+{
+    "app": {
+        "name": "MyGoApp",
+        "environment": "development",
+        "port": 8080
+    },"jwt": {
+        "signingKey": "your-secret-signing-key",
+        "issuer": "example.com",
+        "expiryTime": 15
+    },
+    "logging": {
+        "level": "info",
+        "file": "logs/myapp.log"
+    }
+}

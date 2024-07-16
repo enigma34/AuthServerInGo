@@ -1,4 +1,66 @@
 basePath: /
+definitions:
+  dtos.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        maxLength: 16
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dtos.LoginResponse:
+    properties:
+      accesstoken:
+        type: string
+    type: object
+  dtos.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        maxLength: 16
+        type: string
+      roles:
+        items:
+          type: string
+        type: array
+    required:
+    - email
+    - password
+    type: object
+  dtos.RevokeTokenRequest:
+    properties:
+      accesstoken:
+        type: string
+    type: object
+  models.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      password_hash:
+        type: string
+      roles:
+        items:
+          type: string
+        type: array
+    type: object
+  v1.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  v1.SuccessResponse:
+    properties:
+      message:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -13,22 +75,118 @@ info:
   title: Auth Server API
   version: "1.0"
 paths:
-  /v1/user:
+  /v1/getallusers:
     get:
       consumes:
       - application/json
-      description: Get user by ID
+      description: Returns a JSON list of all users registered in the system.
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: List of all users
           schema:
-            additionalProperties: true
-            type: object
-      summary: Get a user
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "500":
+          description: Internal Server Error, failed to retrieve users
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Retrieves all users
       tags:
       - user
+  /v1/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user by email and password, returning an access
+        token if successful.
+      parameters:
+      - description: Login Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns an access token on successful authentication.
+          schema:
+            $ref: '#/definitions/dtos.LoginResponse'
+        "400":
+          description: Returns an error if the login request fails due to bad input,
+            user not found, or incorrect password.
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: User login
+      tags:
+      - authentication
+  /v1/register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user with an email and password, checks if the
+        user exists, hashes the password, and stores the user in the database.
+      parameters:
+      - description: Register Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully registered
+          schema:
+            $ref: '#/definitions/v1.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Register a new user
+      tags:
+      - authentication
+  /v1/revoke:
+    post:
+      consumes:
+      - application/json
+      description: Revokes the access token provided in the request body.
+      parameters:
+      - description: Access Token
+        in: body
+        name: access_token
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.RevokeTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token revoked successfully
+          schema:
+            $ref: '#/definitions/v1.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Revoke access token
+      tags:
+      - token
   /v2/user:
     get:
       consumes:
@@ -45,4 +203,9 @@ paths:
       summary: Get a user
       tags:
       - user
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
